@@ -1,1 +1,1 @@
-gem 'ruby-audio'
+gem 'wavefile'
