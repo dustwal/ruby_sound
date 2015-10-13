@@ -1,5 +1,11 @@
+# module defines methods for reading and writing .freq files
+#
+# @author dustin walde
 module FreqFile
 
+  # saves a freq_sum to a file
+  # @param freq_sum [FreqSum] freq sum to save
+  # @param filename [String] file path to save to
   def self.save freq_sum, filename
     file = File.new filename, "w"
     wave_map = {}
@@ -19,6 +25,9 @@ module FreqFile
     file.close
   end
 
+  # loads FreqSum from a .freq file
+  # @param filename [String] the filepath of the .freq file
+  # @return [FreqSum] object representation of the .freq file
   def self.load filename
     file = File.new filename
     freq_sum = FreqSum.new
