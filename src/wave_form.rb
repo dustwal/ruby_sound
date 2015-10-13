@@ -1,6 +1,8 @@
 include Math
 module WaveForm
 
+  TYPES = [:sawtooth, :sine, :square, :triangle]
+
   def wave sym, angle
     case sym
     when :triangle
@@ -12,6 +14,10 @@ module WaveForm
     else
       sin angle
     end
+  end
+
+  def noise
+    rand * 2 - 1
   end
 
   def triangle langle
