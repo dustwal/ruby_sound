@@ -1,5 +1,7 @@
 class FreqSum
 
+  include Sound
+
   attr_reader :waves
   attr_accessor :sample_rate, :noise
 
@@ -7,10 +9,6 @@ class FreqSum
     @waves = []
     @noise = 0
     @sample_rate = sample_rate
-  end
-
-  def sample n, freq
-    waves.map{|w| w.sample n*freq}.reduce(:+) + @noise*WaveForm.noise
   end
 
   def sample_at t, freq

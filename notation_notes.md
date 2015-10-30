@@ -20,7 +20,19 @@ bassline = (loudness=1) {
   }
 }
 
-// score
+bassline = [1:bass] () {
+  o1 c2 f8 e >a4
+}
+
+guitar_riff_0 = [1:guitar] (n) {
+  o4 e16 e e e f8 a ..
+  if n==1
+    .. <c b a4
+  else
+    .. <c4 c
+}
+
+// score signal as such (different rules for score vs code (mainly w/ bars))
 
 |-
   bassline
@@ -31,3 +43,22 @@ bassline = (loudness=1) {
   }
   guitar_riff_0
 :||
+
+| bassline |
+|          |
+- tempo<-120
+|:2 bassline v.5  :||
+|:  guitar_riff_0 :||
+
+
+master: |       tempo 120~|:2                 :|~tempo 80 ||
+bass:   | bassline {o0 c} |: bassline v.5     :| bassline ||
+guitar: |                 |: guitar_riff_0(n) :|          ||
+piano:  | o3 c c g g      |:                  :| a a g2   ||
+
+| bassline |:2 bassline v.5 :| bassline ||
+|tempo 120~|: guitar_riff_0 :|~tempo    ||
+
+//at least need:
+
+| main ||
