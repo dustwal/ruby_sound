@@ -1,0 +1,21 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    byebug (6.0.2)
+    polyglot (0.3.5)
+    rdoc (4.2.0)
+    treetop (1.6.3)
+      polyglot (~> 0.3)
+    wavefile (0.6.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  byebug
+  rdoc
+  treetop
+  wavefile
+
+BUNDLED WITH
+   1.10.6

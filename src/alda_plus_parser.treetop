@@ -1,0 +1,255 @@
+grammar AldaRb
+
+  rule root
+    ( tonedef / ruby_block )* alda_score <ScoreRoot>
+  end
+
+  rule tonedef
+    def_header ( alda_block / ruby_block )* def_end <Tonedef>
+  end
+
+  rule alda_block
+    alda_open alda_line* alda_line_close <AldaBlock>
+  end
+
+  rule ruby_block
+    ( arrow_expression / ruby_code )+ <RubyBlock>
+  end
+
+  rule ruby_code
+    ( not_break / space / new_line )+ <RubyCode>
+  end
+
+  rule not_break
+    ( !break word )+
+  end
+
+  rule break
+    'tonedef' / (title_delim word?) / alda_open / 'fin' / (primary arrow) / (primary &(space arrow))
+  end
+
+  rule word
+    [^ \n\t]+
+  end
+
+  rule arrow_expression
+    primary space? arrow space? ( arrow_expression / primary ) <ArrowExpression>
+  end
+
+  rule primary
+    arguments / hash / brackets / number / string / symbol / variable
+  end
+
+  rule string
+    ( "'" mid_str_s? "'" ) / ( '"' mid_str_d? '"' ) <AString>
+  end
+
+  rule mid_str_s
+   ( [^\\'] / ( '\\' . ) )+
+  end
+
+  rule mid_str_d
+   ( ('#' curly_brackets) / [^\\"] / ( '\\' . ) )+
+  end
+
+  rule symbol
+    ':' ( ([a-zA-Z_] [a-zA-Z_0-9?!]*) / string ) <ASymbol>
+  end
+
+  rule arrow
+    '->' <Arrow>
+  end
+
+  rule def_header
+    'tonedef' space variable space? def_brackets space? arguments ( ';' / new_line ) <TonedefHeader>
+  end
+
+  rule def_brackets
+    '[' space? number space? ':' space? csl? space? ']' <TonedefBrackets>
+  end
+
+  rule def_end
+    'fin'
+  end
+
+  rule csl
+    variable ( space? ',' space? csl )? <CommaSeparatedList>
+  end
+
+  rule alda_score
+    score_title alda_line* (( space / alda_comment )* (sound space? ':')? ( alda_word / space )* end_of_file <AldaLine>) <AldaScore>
+  end
+
+  rule alda_line
+    ( space / alda_comment )* (sound space? ':')? (alda_word / space)* new_line <AldaLine>
+  end
+
+  rule alda_line_close
+    ( space / alda_comment )* (sound space? ':')? (alda_word / space)* alda_close <AldaLine>
+  end
+
+  rule alda_comment
+    ';;=' <AldaComment> / '=;;' <AldaComment>
+  end
+
+  rule bar
+    '|'
+  end
+
+  rule alda_word
+    alda_comment / alda_val_set / bar / method_call / note / special / alda_operator / variable
+  end
+
+  rule alda_val_set
+    '(' space? variable space ([^()]+ / arguments)* ')' <ValSet>
+  end
+
+  rule method_call
+    variable arguments <MethodCall>
+  end
+
+  rule hash
+    variable brackets <KindaHash>
+  end
+
+  rule arguments
+    '(' ( string / [^()] / arguments )* ')' <Arguments>
+  end
+
+  rule brackets
+    '[' ( string / [^\[\]] / brackets )* ']' <Brackets>
+  end
+
+  rule curly_brackets
+    '{' ( string / [^\{\}] / curly_brackets )* '}' <CurlyBrackets>
+  end
+
+  rule sound
+    master / variable
+  end
+
+  rule master
+    ':master' <Master>
+  end
+
+  rule score_title
+    title_delim title? title_delim? new_line <ScoreTitle>
+  end
+
+  rule title_delim
+    ':<>:'
+  end
+
+  rule title
+    [a-zA-Z!-\/;-~ \t]+ <Title>
+  end
+
+  rule alda_operator
+    octave_up / octave_down
+  end
+
+  rule accidental
+    natural / flat / sharp
+  end
+
+  rule note
+    pitch accidental* duration? chord? <Note>
+  end
+
+  rule special
+    special_char integer? <Special>
+  end
+
+  rule pitch
+    [a-hA-H]+ <Pitch>
+  end
+
+  rule special_char
+    [i-z]+ [a-z]* <SpecialChar>
+  end
+
+  rule number
+    '.'? integer '.'? integer? <ANumber>
+  end
+
+  rule variable
+    [a-zA-Z_$@]+ [a-zA-Z_$@0-9]* <Variable>
+  end
+
+  rule duration
+    duration_with_int / duration_with_dot / duration_with_tie
+  end
+
+  rule duration_with_dot
+    integer? (space? dot)+ duration_tail? <Duration>
+  end
+
+  rule duration_with_int
+    integer (space? dot)* duration_tail? <Duration>
+  end
+
+  rule duration_with_tie
+    integer? (space? dot)* duration_tail <Duration>
+  end
+
+  rule duration_tail
+    space? tie space? duration_with_int
+  end
+
+  rule integer
+    [0-9]+ <AInteger>
+  end
+
+  rule chord
+    '/' <Chord>
+  end
+
+  rule dot
+    '.' <Dot>
+  end
+
+  rule natural
+    '=' <Natural>
+  end
+
+  rule flat
+    '-' <Flat>
+  end
+
+  rule sharp
+    '+' <Sharp>
+  end
+
+  rule octave_up
+    '<' <OctaveUp>
+  end
+
+  rule octave_down
+    '>' <OctaveDown>
+  end
+
+  rule tie
+    '~' <Tie>
+  end
+
+  rule alda_open
+    '::='
+  end
+
+  rule alda_close
+    '=::'
+  end
+
+  rule end_of_file
+    !.
+  end
+
+  rule space
+    [ \t]+ <Space>
+  end
+
+  rule new_line
+    [\n]
+  end
+
+end

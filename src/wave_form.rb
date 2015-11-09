@@ -3,7 +3,7 @@ module WaveForm
 
   TYPES = [:sawtooth, :sine, :square, :triangle]
 
-  def wave sym, angle
+  def self.wave sym, angle
     case sym
     when :triangle
       triangle angle
@@ -16,13 +16,13 @@ module WaveForm
     end
   end
 
-  def noise
+  def self.noise
     rand * 2 - 1
   end
 
-  def triangle langle
+  def self.triangle langle
     if angle(langle) < PI/2
-      2*langle/PI
+      2*angle(langle)/PI
     elsif angle(langle) < 3*PI/2
       2 - 2*angle(langle)/PI
     else
@@ -30,18 +30,17 @@ module WaveForm
     end
   end
 
-  def sawtooth langle
+  def self.sawtooth langle
     angle(langle)/2 - 1
   end
 
-  def square langle
+  def self.square langle
     angle(langle) < PI ?
       1 :
       -1
   end
 
-  private
-  def angle langle
+  def self.angle langle
     langle % (2*PI)
   end
 

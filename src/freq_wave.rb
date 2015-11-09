@@ -1,3 +1,5 @@
+require './src/wave_form'
+
 class FreqWave
 
   attr_accessor :frequency, :phase, :amplitude, :wave_form
@@ -14,7 +16,7 @@ class FreqWave
   end
 
   def sample_at t
-    amplitude * wave(@wave_form, phase + t * frequency * 2 * PI)
+    amplitude * WaveForm.wave(@wave_form, phase + t * frequency * 2 * Math::PI)
   end
 
 end

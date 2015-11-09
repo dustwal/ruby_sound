@@ -1,0 +1,31 @@
+fade = Effect.define do |t, sound|
+  pos = t/sound.frequency/sound.length
+  if pos > 0.95
+    [1-(pos-0.95)/0.05, 0].max*sound.sample_at(t)
+  else
+    [10*pos, 1].min*sound.sample_at(t)
+  end
+end
+
+$sine = FreqSum[[1, 0, 0.5, :sine]] -> fade
+
+$triangle = FreqSum[[1, 0, 0.05, :sawtooth], [1, 0, 0.15, :triangle]] -> fade
+
+tonedef begin_end [16:$sine,$triangle] ()
+  ::=
+    | c c       g g        | a a       g2        | =;;
+  o2| c g/<c/e> c g/<c/e>  | c a/<c/f> c g/<c/e> | =;;
+  =:: ::=
+    | f4 f       e e       | d d       c2        | =;;
+    | c  a/<c/f> c g/<c/e> | d b/<d/g> c g/<c/e  | =::
+fin
+
+tonedef middle [ 8 : $sine , $triangle ] ()
+::=
+    | g g       f f       | e e       d2       | =;;
+  o2| c <c/e/g> c <c/f/a> | c <c/e/g> d <d/g/b | =::
+fin
+
+:<>:Twinkle Twinkle, Little Star:<>:
+
+:master: | (tempo 100)(volume 75) begin_end() middle() middle() begin_end() ||

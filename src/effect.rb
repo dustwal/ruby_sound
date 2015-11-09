@@ -8,7 +8,11 @@ class Effect
   end
 
   def sample_at t
-    @effect.call t
+    @effect.call t, @sound
+  end
+
+  def self.define &block
+    Proc.new &block
   end
 
 end

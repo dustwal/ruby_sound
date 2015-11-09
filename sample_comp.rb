@@ -26,3 +26,6 @@ stream.push [[r1, Mod.new {tempo: 120}], [
   b1(0), {sound: ssound, ...}, ..., b1(1)
 
 ],[...]]
+
+sqnce = Sequence.new 3
+
