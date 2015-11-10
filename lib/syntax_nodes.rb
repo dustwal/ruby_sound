@@ -108,7 +108,7 @@ module AldaRb
         str += "  ]#{"," unless i == score.length-1}\n"
         i += 1
       end
-      str + "})\n"
+      str + "}#{", #{@header.length}" if @header})\n"
     end
   end
 
@@ -204,7 +204,7 @@ module AldaRb
 
   class Duration < Treetop::Runtime::SyntaxNode
     def to_f
-      base = 4/int
+      base = 4.0/int
       factor = dot_factor dots
       base * factor + additional
     end
@@ -223,7 +223,7 @@ module AldaRb
 
     def additional
       if elements[2].elements
-        elements[2].elements[2].to_f
+        elements[2].find(Duration).to_f
       else
         0
       end

@@ -86,7 +86,7 @@ def begin_end()
     {type: :sound, frequency: :c, chord: true},
     {type: :sound, frequency: :e}
   ]
-})
+}, 16.0)
 
   __streams
 end
@@ -130,7 +130,7 @@ __streams.push Stream.new({
     {type: :sound, frequency: :g, chord: true},
     {type: :sound, frequency: :b}
   ]
-})
+}, 8.0)
 
   __streams
 end

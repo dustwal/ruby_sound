@@ -1,4 +1,4 @@
-require './src/wave_form'
+require './lib/wave_form'
 
 class FreqWave
 

@@ -1,4 +1,4 @@
-require './src/sound'
+require './lib/sound'
 
 class FreqSum
 

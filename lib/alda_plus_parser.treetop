@@ -193,7 +193,7 @@ grammar AldaRb
   end
 
   rule duration_tail
-    space? tie space? duration_with_int
+    (space / bar)* tie (space / bar)* duration_with_int
   end
 
   rule integer

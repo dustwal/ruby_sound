@@ -1,5 +1,5 @@
-require './src/sound'
-require './src/rest'
+require './lib/sound'
+require './lib/rest'
 
 class Stream
 
@@ -19,7 +19,7 @@ class Stream
   attr_reader :length
 
   def initialize map, len=Float::INFINITY
-    @len = length
+    @length = len
     @stream = map
     @stream[:master] ||= []
     @pos = Hash[map.keys.map{|k| [k, [0, 0]]}] # sound, pos (time), index
@@ -54,13 +54,11 @@ class Stream
       when :stream
         start_index = time_to_samples n[:start]
         n[:streams].each do |stream|
-          stream.set_values @values.select{|k,v| k==:master or k==n[:sound]}
-          if n[:duration]
-            new_samps = stream.samples[0..beats_to_samples(n[:duration])]
-          else
-            new_samps = stream.samples
-          end
-          @pos[n[:sound]][0] += new_samps.length/Float(@sample_rate)
+          stream.set_values @values.select{|k,v| k==:master or k==n[:sound]} # TODO figure out how I want to pass evironment
+          new_samps = stream.samples
+          stream_len = [time_to_samples(stream.length), new_samps.length].min
+          new_samps = new_samps[0..stream_len]
+          @pos[n[:sound]][0] += stream_len/Float(@sample_rate)
           expand_array samples, (start_index+new_samps.length)
           (0..new_samps.length-1).each do |i|
             samples[i+start_index] += new_samps[i]
@@ -103,13 +101,16 @@ class Stream
   def handle_sound obj, samples
     sound = obj[:sound]
     vals = @values[sound]
-    set_vals = vals.merge obj
-    set_vals[:frequency] = 261.625565*(2**(set_vals[:octave]-4))*set_vals[:pitch_set].frequency_for(set_vals[:frequency])
-    puts set_vals[:frequency]
-    sound.set_values set_vals
     if obj[:duration]
+      dur = obj[:duration]
+      if dur.is_a? Hash
+        obj[:duration] = vals[:duration]*(dur[:factor] || 1)+(dur[:add] || 0)
+      end
       @values[sound][:duration] = obj[:duration]
     end
+    set_vals = vals.merge obj
+    set_vals[:frequency] = 261.625565*(2**(set_vals[:octave]-4))*set_vals[:pitch_set].frequency_for(set_vals[:frequency])
+    sound.set_values set_vals
     unless obj[:chord]
       @pos[sound][0] += @values[sound][:duration]*60.0/vals[:tempo]
     end
