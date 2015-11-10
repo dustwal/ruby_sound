@@ -27,7 +27,14 @@ def begin_end()
     {type: :sound, frequency: :g},
     {type: :sound, frequency: :a},
     {type: :sound, frequency: :a},
-    {type: :sound, duration: 2.0, frequency: :g}
+    {type: :sound, duration: 2.0, frequency: :g},
+    {type: :sound, duration: 1.0, frequency: :f},
+    {type: :sound, frequency: :f},
+    {type: :sound, frequency: :e},
+    {type: :sound, frequency: :e},
+    {type: :sound, frequency: :d},
+    {type: :sound, frequency: :d},
+    {type: :sound, duration: 2.0, frequency: :c}
   ],
   $triangle => [
     {type: :special, name: :o, value: 2},
@@ -54,11 +61,7 @@ def begin_end()
     {type: :operator, value: :<},
     {type: :sound, frequency: :c, chord: true},
     {type: :sound, frequency: :e},
-    {type: :operator, value: :>}
-  ]
-})
- __streams.push Stream.new({
-  $sine => [
+    {type: :operator, value: :>},
     {type: :sound, frequency: :c},
     {type: :sound, frequency: :a, chord: true},
     {type: :operator, value: :<},
@@ -82,15 +85,6 @@ def begin_end()
     {type: :operator, value: :<},
     {type: :sound, frequency: :c, chord: true},
     {type: :sound, frequency: :e}
-  ],
-  $triangle => [
-    {type: :sound, duration: 1.0, frequency: :f},
-    {type: :sound, frequency: :f},
-    {type: :sound, frequency: :e},
-    {type: :sound, frequency: :e},
-    {type: :sound, frequency: :d},
-    {type: :sound, frequency: :d},
-    {type: :sound, duration: 2.0, frequency: :c}
   ]
 })
 
@@ -102,6 +96,15 @@ def middle()
   __streams = []
 __streams.push Stream.new({
   $sine => [
+    {type: :sound, frequency: :g},
+    {type: :sound, frequency: :g},
+    {type: :sound, frequency: :f},
+    {type: :sound, frequency: :f},
+    {type: :sound, frequency: :e},
+    {type: :sound, frequency: :e},
+    {type: :sound, duration: 2.0, frequency: :d}
+  ],
+  $triangle => [
     {type: :special, name: :o, value: 2},
     {type: :sound, frequency: :c},
     {type: :operator, value: :<},
@@ -126,15 +129,6 @@ __streams.push Stream.new({
     {type: :sound, frequency: :d, chord: true},
     {type: :sound, frequency: :g, chord: true},
     {type: :sound, frequency: :b}
-  ],
-  $triangle => [
-    {type: :sound, frequency: :g},
-    {type: :sound, frequency: :g},
-    {type: :sound, frequency: :f},
-    {type: :sound, frequency: :f},
-    {type: :sound, frequency: :e},
-    {type: :sound, frequency: :e},
-    {type: :sound, duration: 2.0, frequency: :d}
   ]
 })
 
@@ -147,11 +141,28 @@ score_title = "Twinkle Twinkle, Little Star"
 __streams.push Stream.new({
   :master => [
     {tempo: 100},
-    {volume: 75},
+    {volume: 25},
     {type: :stream, streams: begin_end()},
     {type: :stream, streams: middle()},
     {type: :stream, streams: middle()},
     {type: :stream, streams: begin_end()}
+  ],
+  $sine => [
+    {type: :sound, duration: 2.0, frequency: :c},
+    {type: :sound, duration: 1.0, frequency: :d},
+    {type: :sound, frequency: :e},
+    {type: :sound, frequency: :f},
+    {type: :sound, frequency: :g},
+    {type: :sound, frequency: :a},
+    {type: :sound, frequency: :b},
+    {type: :sound, duration: 2.0, frequency: :c},
+    {type: :sound, duration: 1.0, frequency: :b},
+    {type: :sound, frequency: :a},
+    {type: :sound, frequency: :g},
+    {type: :sound, frequency: :f},
+    {type: :sound, frequency: :e},
+    {type: :sound, frequency: :d},
+    {type: :sound, duration: 4.0, frequency: :c}
   ]
 })
 samps = []

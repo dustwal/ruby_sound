@@ -15,7 +15,7 @@ tonedef begin_end [16:$sine,$triangle] ()
   ::=
     | c c       g g        | a a       g2        | =;;
   o2| c g/<c/e> c g/<c/e>  | c a/<c/f> c g/<c/e> | =;;
-  =:: ::=
+
     | f4 f       e e       | d d       c2        | =;;
     | c  a/<c/f> c g/<c/e> | d b/<d/g> c g/<c/e  | =::
 fin
@@ -28,4 +28,5 @@ fin
 
 :<>:Twinkle Twinkle, Little Star:<>:
 
-:master: | (tempo 100)(volume 75) begin_end() middle() middle() begin_end() ||
+:master: | (tempo 100)(volume 25) begin_end() middle() middle() begin_end() ||
+$sine:   | c2 d4 e | f g a b | c2 b4 a | g f e d | c1 ||

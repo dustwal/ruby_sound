@@ -6,6 +6,7 @@ class Stream
   DEFAULT_VALUES = {
     tempo: 120,
     channels: 1,
+    pitch_set: PitchSet.new,
     octave: 4,
     quant: 90,
     pan: 50,
@@ -21,17 +22,24 @@ class Stream
     @len = length
     @stream = map
     @stream[:master] ||= []
-    @pos = Hash[map.keys.collect{|k| [k, [0, 0]]}] # sound, pos (time), index
+    @pos = Hash[map.keys.map{|k| [k, [0, 0]]}] # sound, pos (time), index
     @pos[:master] ||= [0,0]
-    @values = Hash[map.keys.collect{|k| [k, DEFAULT_VALUES]}]
-    @values[:master] = DEFAULT_VALUES.merge({volume: 100.0/127})
+    @values = Hash[map.keys.map{|k| [k, DEFAULT_VALUES.merge({})]}]
+    @values[:master] = DEFAULT_VALUES.merge({volume: 100.0/1.27})
     @sample_rate = 44100
   end
 
   def set_values hash
+    if hash.has_key? :master
+      @values.each_key do |k|
+        @values[k] = @values[k].merge hash[:master]
+      end
+    end
     hash.each do |k, v|
       if @values.has_key? k
-        @values[k].merge! v
+        @values[k] = @values[k].merge v
+      else
+        @values[k] = v.merge({})
       end
     end
   end
@@ -39,14 +47,14 @@ class Stream
   def samples
     samples = []
     while n = next_sound
-      puts "#{n[:type]} #{n[:start]} #{n[:duration]}"
+      puts "#{n[:type]} #{n[:sound]} #{n[:start]} #{n[:duration]}"
       case n[:type]
       when :sound
         handle_sound n, samples
       when :stream
         start_index = time_to_samples n[:start]
         n[:streams].each do |stream|
-          stream.set_values @values
+          stream.set_values @values.select{|k,v| k==:master or k==n[:sound]}
           if n[:duration]
             new_samps = stream.samples[0..beats_to_samples(n[:duration])]
           else
@@ -61,7 +69,7 @@ class Stream
         end
       when :attributes
         if n[:sound] == :master
-          @values.each {|k,v| @values[k].merge! n[:attributes]}
+          @values.each {|k,v| @values[k] = @values[k].merge n[:attributes]}
         else
           @values[n[:sound]].merge! n[:attributes]
         end
@@ -95,10 +103,15 @@ class Stream
   def handle_sound obj, samples
     sound = obj[:sound]
     vals = @values[sound]
-    sound.set_values vals.merge obj
+    set_vals = vals.merge obj
+    set_vals[:frequency] = 261.625565*(2**(set_vals[:octave]-4))*set_vals[:pitch_set].frequency_for(set_vals[:frequency])
+    puts set_vals[:frequency]
+    sound.set_values set_vals
     if obj[:duration]
       @values[sound][:duration] = obj[:duration]
-      @pos[sound][0] += obj[:duration]*60.0/vals[:tempo]
+    end
+    unless obj[:chord]
+      @pos[sound][0] += @values[sound][:duration]*60.0/vals[:tempo]
     end
     start_index = time_to_samples obj[:start]
     end_index = start_index + Integer(sound.length*@sample_rate)

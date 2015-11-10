@@ -33,23 +33,22 @@ module Treetop
       end
 
       def search const
-        found = find const
-        if found
-          found
-        else
-          elements.each do |e|
-            found = e.search const
-            if found
-              return round
-            end
-          end unless terminal?
-          nil
-        end
+        elements.each do |e|
+          if e.class == const
+            return e
+          end
+          found = e.search const
+          if found
+            return round
+          end
+        end unless terminal?
+        nil
       end
 
       def search_all const
-        els = find_all const
+        els = []
         elements.each do |e|
+          els += [e] if e.class == const
           els += e.search_all const
         end unless terminal?
         els
