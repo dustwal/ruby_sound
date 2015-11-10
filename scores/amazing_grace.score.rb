@@ -7,10 +7,10 @@ fade = Effect.define do |t, sound|
   end
 end
 
-top_h = FreqSum[[1,0,0.75, :sine],[1,0,0.25, :triangle]] -> fade
-top_l = FreqSum[[1,0,0.5, :triangle]] -> fade
-bot_h = FreqSum[[1,0,0.5, :triangle]] -> fade
-bot_l = FreqSum[[1,0,0.25, :square], [1,0,0.75,:sine]] -> fade
+top_h = FreqSum[[1,0,0.75, :sine],[1,0,0.2, :triangle],[2,0,0.05,:sine]] -> fade
+top_l = FreqSum[[1,0,0.75, :triangle]] -> fade
+bot_h = FreqSum[[1,0,1, :triangle]] -> fade
+bot_l = FreqSum[[1,0,0.05, :square],[1,0,0.75,:sine],[0.5,0,0.2,:triangle]] -> fade
 
 :<>:Amazing Grace:<>:
 

@@ -1,0 +1,13 @@
+Future Features:
+Add chords to vars / method calls
+add effects to notes
+
+Hopefull (long-term) Freatures:
+simple text editor / score viewer to see score expand tonedefs
+or to view full compiled scores rendered into human readable formats (might be
+worth turning into Alda (or similar) score and use alda plugins to do that)
+
+Bugs/Optimization:
+treat rest value as duration not just number
+
+save sounds at freq/duration for quick access later
