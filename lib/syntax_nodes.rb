@@ -71,7 +71,7 @@ module AldaRb
     attr_accessor :header
 
     def value
-      lines = search_all(AldaLine).select {|l| !l.empty?}
+      lines = (find_all(AldaLine)+elements[1].find_all(AldaLine)).select {|l| !l.empty?}
       score = {}
       sounds = @header ? @header.sounds : []
       cur = sounds.length > 0 ? 0 : nil
@@ -96,9 +96,7 @@ module AldaRb
     end
 
     def to_ruby score
-      title = find ScoreTitle
-      str = title ? title.value+"\n\n" : ""
-      str += "__streams.push Stream.new({\n"
+      str = "Stream.new({\n"
       i = 0
       score.each do |k,v|
         str += "  #{k} => [\n"
@@ -108,11 +106,15 @@ module AldaRb
         str += "  ]#{"," unless i == score.length-1}\n"
         i += 1
       end
-      str + "}#{", #{@header.length}" if @header})\n"
+      str + "}#{", #{@header.length}" if @header and @header.length})\n"
     end
   end
 
   class AldaBlock < AldaBase
+    def value
+      title = find(ScoreTitle)
+      (title ? title.value+"\n\n" : "") + "__streams.push " + super
+    end
   end
 
   class AldaComment < Treetop::Runtime::SyntaxNode
@@ -140,9 +142,12 @@ module AldaRb
       root.each do |e|
         if e.class == MethodCall or e.class == Variable
           res.push "{type: :stream, streams: #{e.value}}"
+        elsif e.class == InlineEffect
+          e.set_sound sound
+          res.push "{type: :stream, streams: #{e.value}}"
         elsif e.class == Note
           res.push "{type: :sound#{", duration: #{e.duration}" if e.duration}, frequency: :#{e.frequency}#{", chord: true" if e.chord?}}"
-        elsif e.class == Special
+        elsif e.class == Special or e.class == ARest
           res.push "{type: :special, name: :#{e.name}#{", value: #{e.num}" if e.num}}"
         elsif e.class == OctaveUp or e.class == OctaveDown
           res.push "{type: :operator, value: :#{e.value}}"
@@ -154,10 +159,27 @@ module AldaRb
     end
   end
 
-  class AldaScore < AldaBase
+  class AldaScore < AldaBlock
   end
 
   class ANumber < Treetop::Runtime::SyntaxNode
+  end
+
+  class ARest < Treetop::Runtime::SyntaxNode
+    def name
+      :r
+    end
+
+    def num
+      dur = find Duration
+      if dur
+        if dur.integer?
+          dur.to_f
+        else
+          dur.vals
+        end
+      end
+    end
   end
 
   class Arguments < Treetop::Runtime::SyntaxNode
@@ -253,6 +275,32 @@ module AldaRb
   end
 
   class Flat < Treetop::Runtime::SyntaxNode
+  end
+
+  class InlineEffect < AldaBase
+    class InlineHeader
+      def initialize effsound
+        @effsound = effsound
+      end
+
+      def length
+        nil
+      end
+
+      def sounds
+        [@effsound]
+      end
+    end
+
+    def set_sound sound
+      @sound = sound
+    end
+
+    def value
+      @header = InlineHeader.new "Effect.new(#{@sound}, #{elements.last.value})"
+      '[' + super + ']'
+    end
+
   end
 
   class KindaHash < Treetop::Runtime::SyntaxNode

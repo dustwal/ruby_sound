@@ -56,7 +56,7 @@ class Stream
         n[:streams].each do |stream|
           stream.set_values @values.select{|k,v| k==:master or k==n[:sound]} # TODO figure out how I want to pass evironment
           new_samps = stream.samples
-          stream_len = [time_to_samples(stream.length), new_samps.length].min
+          stream_len = (stream.length == Float::INFINITY ? new_samps.length : time_to_samples(stream.length*60.0/@values[n[:sound]][:tempo]))
           new_samps = new_samps[0..stream_len]
           @pos[n[:sound]][0] += stream_len/Float(@sample_rate)
           expand_array samples, (start_index+new_samps.length)
@@ -77,12 +77,13 @@ class Stream
           @values[n[:sound]][:octave] = n[:value]
         when :r
           if n[:value]
-            dur = 4/n[:value]
+            dur = n[:value]
+            if dur.is_a? Hash
+              dur = @values[n[:sound]][:duration]*(dur[:factor] || 1)+(dur[:add] || 0)
+            end
             @values[n[:sound]][:duration] = dur
-          else
-            dur = @values[n[:sound]][:duration]
           end
-          @pos[n[:sound]][0] += dur*60.0/@values[n[:sound]][:tempo]
+          @pos[n[:sound]][0] += @values[n[:sound]][:duration]*60.0/@values[n[:sound]][:tempo]
         end
       when :operator
         if n[:value] == :<
@@ -133,7 +134,7 @@ class Stream
   end
 
   def time_to_samples t
-    Integer t*@sample_rate
+    Integer((t*@sample_rate).round)
   end
 
   def next_sound

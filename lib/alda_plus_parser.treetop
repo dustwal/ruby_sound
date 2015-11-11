@@ -88,6 +88,10 @@ grammar AldaRb
     ( space / alda_comment )* (sound space? ':')? (alda_word / space)* alda_close <AldaLine>
   end
 
+  rule alda_inline_paren
+    ( space / alda_comment )* (sound space? ':')? (alda_word / space)* ')' <AldaLine>
+  end
+
   rule alda_comment
     ';;=' <AldaComment> / '=;;' <AldaComment>
   end
@@ -97,11 +101,15 @@ grammar AldaRb
   end
 
   rule alda_word
-    alda_comment / alda_val_set / bar / method_call / note / special / alda_operator / variable
+    alda_comment / inline_effect / alda_val_set / bar / method_call / note / rest / special / alda_operator / variable
   end
 
   rule alda_val_set
     '(' space? variable space ([^()]+ / arguments)* ')' <ValSet>
+  end
+
+  rule inline_effect
+    '(' alda_line* alda_inline_paren space? arrow space? (arguments / method_call / hash / variable) <InlineEffect>
   end
 
   rule method_call
@@ -158,6 +166,10 @@ grammar AldaRb
 
   rule special
     special_char integer? <Special>
+  end
+
+  rule rest
+    'r' duration? <ARest>
   end
 
   rule pitch
