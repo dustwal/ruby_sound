@@ -71,7 +71,7 @@ module AldaRb
     attr_accessor :header
 
     def value
-      lines = (find_all(AldaLine)+elements[1].find_all(AldaLine)).select {|l| !l.empty?}
+      lines = (elements[1].find_all(AldaLine)+find_all(AldaLine)).select {|l| !l.empty?}
       score = {}
       sounds = @header ? @header.sounds : []
       cur = sounds.length > 0 ? 0 : nil
@@ -189,16 +189,27 @@ module AldaRb
   end
 
   class ArrowExpression < Treetop::Runtime::SyntaxNode
+
     def value
-      vals = []
-      elements.each do |e|
-        if e.is_a? Space or e.is_a? Arrow
-          next
-        else
-          vals.push e.value
-        end
+      nest_str to_a
+    end
+
+    def nest_str arr
+      if arr.length == 1
+        arr[0].value
+      else
+        "Effect.new(#{nest_str arr[0..-2]}, #{arr[arr.length-1].value})"
       end
-      "Effect.new(#{vals[0]}, #{vals[1]})"
+    end
+
+    def to_a
+      lhs = elements[0]
+      rhs = elements[4]
+      if rhs.is_a? ArrowExpression
+        [lhs] + rhs.to_a
+      else
+        [lhs, rhs]
+      end
     end
   end
 
@@ -359,8 +370,9 @@ module AldaRb
         super() +
         "samps = []\n" +
         "__streams.each {|s| samps += s.samples}\n" +
-        "buffer = Buffer.new samps, Format.new(:mono, :float, 44100)\n" +
-        "Writer.new score_title.gsub(/[^a-zA-Z\\-\\_]/, \"\")+\".wav\", Format.new(:mono, :pcm_16, 44100) do |writer|\n" +
+        "channels = samps[0].is_a?(Array) ? samps[0].length : 1\n" +
+        "buffer = Buffer.new samps, Format.new(channels, :float, 44100)\n" +
+        "Writer.new score_title.gsub(/[^a-zA-Z\\-\\_]/, \"\")+\".wav\", Format.new(channels, :pcm_16, 44100) do |writer|\n" +
         "  writer.write buffer\n" +
         "end"
     end

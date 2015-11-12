@@ -1,6 +1,7 @@
 lib_path = "./lib"
 
 require "wavefile"
+require "#{lib_path}/sample"
 require "#{lib_path}/sound"
 require "#{lib_path}/effect"
 require "#{lib_path}/compound"

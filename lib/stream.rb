@@ -5,7 +5,7 @@ class Stream
 
   DEFAULT_VALUES = {
     tempo: 120,
-    channels: 1,
+    channels: 2,
     pitch_set: PitchSet.new,
     octave: 4,
     quant: 90,
@@ -27,6 +27,7 @@ class Stream
     @values = Hash[map.keys.map{|k| [k, DEFAULT_VALUES.merge({})]}]
     @values[:master] = DEFAULT_VALUES.merge({volume: 100.0/1.27})
     @sample_rate = 44100
+    @samples = []
   end
 
   def set_values hash
@@ -44,24 +45,54 @@ class Stream
     end
   end
 
+  def reset
+    @pos = Hash[@pos.keys.map{|k| [k, [0, 0]]}] # sound, pos (time), index
+    @pos[:master] ||= [0,0]
+    @values = Hash[@values.keys.map{|k| [k, DEFAULT_VALUES.merge({})]}]
+    @values[:master] = DEFAULT_VALUES.merge({volume: 100.0/1.27})
+  end
+
+  def copy
+    ret = {}
+    @values.each do |k,v|
+      ret[k] = v.merge({})
+    end
+    ret
+  end
+
   def samples
+    @samples.each do |ar|
+      puts (@values.keys == ar[0].keys)
+      if @values.keys == ar[0].keys
+        equal = true
+        @values.keys.each do |k|
+          DEFAULT_VALUES.keys.each do |dk|
+            equal = @values[k][dk] == ar[0][k][dk]
+            break unless equal
+          end
+          break unless equal
+        end
+        return ar[1] if equal
+      end
+    end
+    @samples.push [copy, nil]
     samples = []
     while n = next_sound
-      puts "#{n[:type]} #{n[:sound]} #{n[:start]} #{n[:duration]}"
+      puts "#{n[:type]} #{n[:sound]} start:#{n[:start]} length:#{n[:duration]} freq:#{n[:frequency]}"
       case n[:type]
       when :sound
         handle_sound n, samples
       when :stream
         start_index = time_to_samples n[:start]
         n[:streams].each do |stream|
-          stream.set_values @values.select{|k,v| k==:master or k==n[:sound]} # TODO figure out how I want to pass evironment
+          stream.set_values({master: @values[:master].merge(@values[n[:sound]])})
           new_samps = stream.samples
           stream_len = (stream.length == Float::INFINITY ? new_samps.length : time_to_samples(stream.length*60.0/@values[n[:sound]][:tempo]))
           new_samps = new_samps[0..stream_len]
           @pos[n[:sound]][0] += stream_len/Float(@sample_rate)
           expand_array samples, (start_index+new_samps.length)
           (0..new_samps.length-1).each do |i|
-            samples[i+start_index] += new_samps[i]
+            samples[i+start_index] = Sample.new(new_samps[i]) + samples[i+start_index]
           end
           start_index += new_samps.length
         end
@@ -94,6 +125,8 @@ class Stream
       else
       end
     end
+    @samples[@samples.length-1][1] = samples
+    reset
     samples
   end
 
@@ -111,21 +144,23 @@ class Stream
     end
     set_vals = vals.merge obj
     set_vals[:frequency] = 261.625565*(2**(set_vals[:octave]-4))*set_vals[:pitch_set].frequency_for(set_vals[:frequency])
+    puts set_vals[:frequency]
     sound.set_values set_vals
     unless obj[:chord]
-      @pos[sound][0] += @values[sound][:duration]*60.0/vals[:tempo]
+      @pos[sound][0] += sound.full_length
     end
     start_index = time_to_samples obj[:start]
-    end_index = start_index + Integer(sound.length*@sample_rate)
-    expand_array samples, end_index
+    end_index = start_index + Integer(sound.length*@sample_rate) #round? XXX
+    end_index_full = start_index + Integer((sound.full_length*@sample_rate).round)
+    expand_array samples, end_index_full
     (start_index..end_index-1).each do |sample|
-      samples[sample] += sound.sample(Float(sample-start_index)/@sample_rate)
+      samples[sample] = sound.sample_sound(Float(sample-start_index)/@sample_rate) + samples[sample]
     end
   end
 
   def expand_array array, length
     if array.length < length
-      (array.length..length-1).each{array.push 0.0}
+      (array.length..length-1).each{array.push [0.0, 0.0]}
     end
   end
 

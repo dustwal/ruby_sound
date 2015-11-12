@@ -25,17 +25,29 @@ module Sound
     end
   end
 
+  def sample t
+    Sample.new sample_at t
+  end
+
   def sample_at t
     0
   end
 
-  def sample t
+  def sample_sound t
     if channels == 2
-      samples = sample_at frequency*t
-      [volume*[1, 1-2*pan].min*samples[0],
-       volume*[1, 2*pan].min*samples[1]]
+      samples = sample(t*frequency)
+      left = [1, 2-2*pan].min
+      right = [1, 2*pan].min
+      if samples.length >= 2
+        samples[0] *= volume*left
+        samples[1] *= volume*right
+        samples
+      else
+        samp = Sample.new [volume*samples*left, volume*samples*right]
+        samp
+      end
     else
-      volume * sample_at(frequency*t)
+      Sample.new(sample(t*frequency).to_f*volume)
     end
   end
 
@@ -71,6 +83,10 @@ module Sound
     @values[:tempo] || Stream::DEFAULT_VALUES[:tempo]
   end
 
+  def full_length
+    duration*60.0/tempo
+  end
+
   def length_t
     duration*quantization*60.0/tempo
   end
@@ -97,6 +113,11 @@ module Sound
 
   def channels
     @values[:channels] || Stream::DEFAULT_VALUES[:channels]
+  end
+
+  def save
+    @samples = [] unless @samples
+    # TODO
   end
 
 end
