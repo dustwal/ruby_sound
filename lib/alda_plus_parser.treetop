@@ -149,7 +149,7 @@ grammar AldaRb
   end
 
   rule title
-    [a-zA-Z!-\/;-~ \t]+ <Title>
+    [a-zA-Z0-9!-\/;-~ \t]+ <Title>
   end
 
   rule alda_operator

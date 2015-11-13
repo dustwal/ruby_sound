@@ -365,14 +365,15 @@ module AldaRb
   class ScoreRoot < Treetop::Runtime::SyntaxNode
     def value
       "require './score'\n\n" +
-        "include WaveFile\n\n" +
+        "include WaveFile\n" +
+        "include ARB::EFX\n\n" +
         "__streams = []\n" +
         super() +
         "samps = []\n" +
         "__streams.each {|s| samps += s.samples}\n" +
         "channels = samps[0].is_a?(Array) ? samps[0].length : 1\n" +
         "buffer = Buffer.new samps, Format.new(channels, :float, 44100)\n" +
-        "Writer.new score_title.gsub(/[^a-zA-Z\\-\\_]/, \"\")+\".wav\", Format.new(channels, :pcm_16, 44100) do |writer|\n" +
+        "Writer.new score_title.gsub(/[^a-zA-Z0-9\\-\\_]/, \"\")+\".wav\", Format.new(channels, :pcm_16, 44100) do |writer|\n" +
         "  writer.write buffer\n" +
         "end"
     end
