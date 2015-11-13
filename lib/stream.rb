@@ -27,7 +27,7 @@ class Stream
     @values = Hash[map.keys.map{|k| [k, DEFAULT_VALUES.merge({})]}]
     @values[:master] = DEFAULT_VALUES.merge({volume: 100.0/1.27})
     @sample_rate = 44100
-    @samples = []
+    @samples = {}
   end
 
   def set_values hash
@@ -61,21 +61,8 @@ class Stream
   end
 
   def samples
-    @samples.each do |ar|
-      puts (@values.keys == ar[0].keys)
-      if @values.keys == ar[0].keys
-        equal = true
-        @values.keys.each do |k|
-          DEFAULT_VALUES.keys.each do |dk|
-            equal = @values[k][dk] == ar[0][k][dk]
-            break unless equal
-          end
-          break unless equal
-        end
-        return ar[1] if equal
-      end
-    end
-    @samples.push [copy, nil]
+    return @samples[@values] if @samples[@values]
+    start_values = copy
     samples = []
     while n = next_sound
       puts "#{n[:type]} #{n[:sound]} start:#{n[:start]} length:#{n[:duration]} freq:#{n[:frequency]}"
@@ -125,9 +112,8 @@ class Stream
       else
       end
     end
-    @samples[@samples.length-1][1] = samples
     reset
-    samples
+    @samples[start_values] = samples
   end
 
   private
@@ -149,12 +135,15 @@ class Stream
     unless obj[:chord]
       @pos[sound][0] += sound.full_length
     end
+
     start_index = time_to_samples obj[:start]
-    end_index = start_index + Integer(sound.length*@sample_rate) #round? XXX
     end_index_full = start_index + Integer((sound.full_length*@sample_rate).round)
     expand_array samples, end_index_full
-    (start_index..end_index-1).each do |sample|
-      samples[sample] = sound.sample_sound(Float(sample-start_index)/@sample_rate) + samples[sample]
+    sound.save
+
+    sound_samples = sound.samples
+    sound_samples.length.times do |i|
+      samples[i+start_index] = sound_samples[i] + samples[i+start_index]
     end
   end
 

@@ -24,6 +24,14 @@ class Sample
     n
   end
 
+  def left
+    @sample[0]
+  end
+
+  def right
+    @sample.length>1 ? @sample[1] : @sample[0]
+  end
+
   def channels
     @sample.length
   end

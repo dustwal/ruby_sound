@@ -1,17 +1,6 @@
-linear_fade = Effect.define do |t, sound|
-  pos = t/sound.frequency/sound.length
-  (1.0-pos)*sound.sample(t)
-end
-
-quadratic_fade = Effect.define do |t, sound|
-  pos = t/sound.frequency/sound.length
-  ((1.0-pos)**2)*sound.sample(t)
-end
-
-inv_quadratic_fade = Effect.define do |t, sound|
-  pos = t/sound.frequency/sound.length
-  (1.0-(pos**2))*sound.sample(t)
-end
+linear_fade = ARB::EFX.power_fade 1
+quadratic_fade = ARB::EFX.power_fade 2
+inv_quadratic_fade = ARB::EFX.inverse_power_fade 2
 
 lr = Effect.define do |t, sound|
   realt = t/sound.frequency
@@ -29,7 +18,6 @@ tonedef scale [16:] (sound)
     sound: | c2 d4 e | f g a b |<c2>b4 a | g f e d |
     =::
 fin
-
 
 :<>:sound_test:<>:
 

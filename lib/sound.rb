@@ -51,14 +51,29 @@ module Sound
     end
   end
 
+  def samples
+    if @samples[@values]
+      @samples[@values]
+    else
+      arr = Array.new(Integer((length*sample_rate).round))
+      arr.length.times do |i|
+        arr[i] = sample_sound Float(i)/sample_rate
+      end
+      arr
+    end
+  end
+
   def set_values args
     if @values
       @values = @values.merge args
     else
       @values = args
     end
+    [:pitch_set, :key, :type, :start, :sound, :chord].each do |k|
+      @values.delete k
+    end
     if @sound
-      @sound.set_values args
+      @sound.set_values @values
     end
   end
 
@@ -116,8 +131,8 @@ module Sound
   end
 
   def save
-    @samples = [] unless @samples
-    # TODO
+    @samples = {} unless @samples
+    @samples[@values.merge({})] = samples unless @samples[@values]
   end
 
 end
