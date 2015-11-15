@@ -102,6 +102,10 @@ module Sound
     duration*60.0/tempo
   end
 
+  def length_s
+    Integer (length_t*sample_rate).round
+  end
+
   def length_t
     duration*quantization*60.0/tempo
   end

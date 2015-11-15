@@ -1,6 +1,5 @@
-include ARB::EFX
-sound = FreqSum[[1,0,1,:sine]] -> (inverse_power_fade(2))
+sound = (Guitar.new 5)
 
 :<>:test:<>:
 
-sound: | (volume 50) o2 c1~1 c4 c c8 c c c |
+sound: | (volume 50) o2 c1 c4 c c8 c c c |

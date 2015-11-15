@@ -33,7 +33,7 @@ grammar AldaRb
   end
 
   rule arrow_expression
-    primary space? arrow space? ( arrow_expression / primary ) <ArrowExpression>
+    primary space? arrow (space / new_line)* ( arrow_expression / primary ) <ArrowExpression>
   end
 
   rule primary
@@ -65,7 +65,7 @@ grammar AldaRb
   end
 
   rule def_brackets
-    '[' space? number space? ':' space? csl? space? ']' <TonedefBrackets>
+    '[' space? number? space? ':' space? csl? space? ']' <TonedefBrackets>
   end
 
   rule def_end

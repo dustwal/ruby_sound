@@ -146,7 +146,7 @@ module AldaRb
           e.set_sound sound
           res.push "{type: :stream, streams: #{e.value}}"
         elsif e.class == Note
-          res.push "{type: :sound#{", duration: #{e.duration}" if e.duration}, frequency: :#{e.frequency}#{", chord: true" if e.chord?}}"
+          res.push "{type: :sound#{", duration: #{e.duration}" if e.duration}, frequency: :#{e.frequency}#{", chord: true" if e.chord?}#{", accidentals: #{e.accidentals.to_s}" if e.accidentals}}"
         elsif e.class == Special or e.class == ARest
           res.push "{type: :special, name: :#{e.name}#{", value: #{e.num}" if e.num}}"
         elsif e.class == OctaveUp or e.class == OctaveDown
@@ -286,6 +286,9 @@ module AldaRb
   end
 
   class Flat < Treetop::Runtime::SyntaxNode
+    def value
+      :-
+    end
   end
 
   class InlineEffect < AldaBase
@@ -324,6 +327,9 @@ module AldaRb
   end
 
   class Natural < Treetop::Runtime::SyntaxNode
+    def value
+      :'='
+    end
   end
 
   class Note < Treetop::Runtime::SyntaxNode
@@ -340,6 +346,14 @@ module AldaRb
 
     def frequency
       find(Pitch).value.to_sym
+    end
+
+    def accidentals
+      if elements[1].elements.length > 0
+        ret = elements[1].elements.map {|e| e.value }
+      else
+        nil
+      end
     end
 
     def chord?
@@ -363,20 +377,6 @@ module AldaRb
   end
 
   class ScoreRoot < Treetop::Runtime::SyntaxNode
-    def value
-      "require './score'\n\n" +
-        "include WaveFile\n" +
-        "include ARB::EFX\n\n" +
-        "__streams = []\n" +
-        super() +
-        "samps = []\n" +
-        "__streams.each {|s| samps += s.samples}\n" +
-        "channels = samps[0].is_a?(Array) ? samps[0].length : 1\n" +
-        "buffer = Buffer.new samps, Format.new(channels, :float, 44100)\n" +
-        "Writer.new score_title.gsub(/[^a-zA-Z0-9\\-\\_]/, \"\")+\".wav\", Format.new(channels, :pcm_16, 44100) do |writer|\n" +
-        "  writer.write buffer\n" +
-        "end"
-    end
   end
 
   class ScoreTitle < Treetop::Runtime::SyntaxNode
@@ -386,6 +386,9 @@ module AldaRb
   end
 
   class Sharp < Treetop::Runtime::SyntaxNode
+    def value
+      :+
+    end
   end
 
   class Space < Treetop::Runtime::SyntaxNode
@@ -446,7 +449,11 @@ module AldaRb
     end
 
     def length
-      Float(find(TonedefBrackets).find(ANumber).value)
+      if number = find(TonedefBrackets).find(ANumber)
+        Float(number.value)
+      else
+        nil
+      end
     end
 
     def name

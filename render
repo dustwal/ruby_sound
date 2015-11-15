@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 filein = ARGV[0]
+sample_rate = Integer(ARGV[1] || 44100)
 fileout = filein.split(".")[0] + ".rb"
 
 system "ruby ./lib/compile.rb #{filein}"
@@ -8,7 +9,7 @@ unless $?.exitstatus == 0
   puts "ERROR: error on score compile of #{filein}"
   exit
 end
-system "ruby #{fileout}"
+system "ruby #{fileout} #{sample_rate}"
 unless $?.exitstatus == 0
   puts "ERROR: on rendering compiled score #{fileout}"
   exit

@@ -5,12 +5,11 @@ class FreqSum
   include Sound
 
   attr_reader :waves
-  attr_accessor :sample_rate, :noise
+  attr_accessor :noise
 
-  def initialize sample_rate=44100
+  def initialize
     @waves = []
     @noise = 0
-    @sample_rate = sample_rate
   end
 
   def sample_at t, freq=1
@@ -20,7 +19,11 @@ class FreqSum
   def self.[] *arr
     fs = FreqSum.new
     arr.each do |attrs|
-      fs.waves.push FreqWave.new(attrs[0], attrs[1], attrs[2], attrs[3])
+      if attrs.length == 4
+        fs.waves.push FreqWave.new(attrs[0], attrs[1], attrs[2], attrs[3])
+      else
+        @noise = attrs[0]
+      end
     end
     fs
   end

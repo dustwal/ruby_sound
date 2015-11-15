@@ -12,10 +12,10 @@ class Stream
     pan: 50,
     duration: 1, # quarter note
     key: {},
+    sample_rate: 44100,
     volume: 100
   }
 
-  attr_accessor :sample_rate
   attr_reader :length
 
   def initialize map, len=Float::INFINITY
@@ -26,7 +26,6 @@ class Stream
     @pos[:master] ||= [0,0]
     @values = Hash[map.keys.map{|k| [k, DEFAULT_VALUES.merge({})]}]
     @values[:master] = DEFAULT_VALUES.merge({volume: 100.0/1.27})
-    @sample_rate = 44100
     @samples = {}
   end
 
@@ -65,18 +64,18 @@ class Stream
     start_values = copy
     samples = []
     while n = next_sound
-      puts "#{n[:type]} #{n[:sound]} start:#{n[:start]} length:#{n[:duration]} freq:#{n[:frequency]}"
       case n[:type]
       when :sound
         handle_sound n, samples
       when :stream
-        start_index = time_to_samples n[:start]
+        puts "Stream: #{n[:sound]} s#{n[:start]} strs:#{n[:streams].length} 0:#{n[:streams][0].length}"
+        start_index = time_to_samples n[:start], @values[n[:sound]][:sample_rate]
         n[:streams].each do |stream|
           stream.set_values({master: @values[:master].merge(@values[n[:sound]])})
           new_samps = stream.samples
-          stream_len = (stream.length == Float::INFINITY ? new_samps.length : time_to_samples(stream.length*60.0/@values[n[:sound]][:tempo]))
+          stream_len = (stream.length == Float::INFINITY ? new_samps.length : time_to_samples(stream.length*60.0/@values[n[:sound]][:tempo], @values[n[:sound]][:sample_rate]))
           new_samps = new_samps[0..stream_len]
-          @pos[n[:sound]][0] += stream_len/Float(@sample_rate)
+          @pos[n[:sound]][0] += stream_len/Float(@values[n[:sound]][:sample_rate])
           expand_array samples, (start_index+new_samps.length)
           (0..new_samps.length-1).each do |i|
             samples[i+start_index] = Sample.new(new_samps[i]) + samples[i+start_index]
@@ -84,15 +83,19 @@ class Stream
           start_index += new_samps.length
         end
       when :attributes
+        puts "ATTRS: #{n[:sound]} #{n[:attributes].to_s}"
         if n[:sound] == :master
           @values.each {|k,v| @values[k] = @values[k].merge n[:attributes]}
         else
           @values[n[:sound]].merge! n[:attributes]
         end
       when :special
+        puts "Special: #{n[:sound]} #{n[:name]} #{n[:value]}"
         case n[:name]
         when :o
           @values[n[:sound]][:octave] = n[:value]
+        when :j
+          @pos[n[:sound]][0] += n[:value]*60.0/@values[n[:sound]][:tempo]
         when :r
           if n[:value]
             dur = n[:value]
@@ -104,6 +107,7 @@ class Stream
           @pos[n[:sound]][0] += @values[n[:sound]][:duration]*60.0/@values[n[:sound]][:tempo]
         end
       when :operator
+        puts "Operator: #{n[:value]}"
         if n[:value] == :<
           @values[n[:sound]][:octave] += 1
         elsif n[:value] == :>
@@ -130,14 +134,19 @@ class Stream
     end
     set_vals = vals.merge obj
     set_vals[:frequency] = 261.625565*(2**(set_vals[:octave]-4))*set_vals[:pitch_set].frequency_for(set_vals[:frequency])
+    if set_vals[:accidentals]
+      set_vals[:accidentals].each do |acc|
+        set_vals[:frequency] = set_vals[:pitch_set].mod_with(acc).call set_vals[:frequency]
+      end
+    end
     puts set_vals[:frequency]
     sound.set_values set_vals
     unless obj[:chord]
       @pos[sound][0] += sound.full_length
     end
-
-    start_index = time_to_samples obj[:start]
-    end_index_full = start_index + Integer((sound.full_length*@sample_rate).round)
+    puts "Sound: #{sound} f:#{set_vals[:frequency]} d:#{set_vals[:duration]} s:#{set_vals[:start]}"
+    start_index = time_to_samples obj[:start], vals[:sample_rate]
+    end_index_full = start_index + Integer((sound.full_length*vals[:sample_rate]).round)
     expand_array samples, end_index_full
     sound.save
 
@@ -153,12 +162,12 @@ class Stream
     end
   end
 
-  def beats_to_samples beats, tempo
-    Integer beats*@sample_rate*60.0/tempo
+  def beats_to_samples beats, tempo, sample_rate
+    Integer beats*sample_rate*60.0/tempo
   end
 
-  def time_to_samples t
-    Integer((t*@sample_rate).round)
+  def time_to_samples t, sample_rate
+    Integer((t*sample_rate).round)
   end
 
   def next_sound
