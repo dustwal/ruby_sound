@@ -39,7 +39,7 @@ module Treetop
           end
           found = e.search const
           if found
-            return round
+            return found
           end
         end unless terminal?
         nil
@@ -73,16 +73,14 @@ module AldaRb
     def value
       lines = (elements[1].find_all(AldaLine)+find_all(AldaLine)).select {|l| !l.empty?}
       score = {}
-      sounds = @header ? @header.sounds : []
-      cur = sounds.length > 0 ? 0 : nil
       lines.each do |line|
         sound = line.sound
         unless sound
-          unless cur
+          unless @sound
+            puts line.value
             raise "no instrument selected"
           end
-          sound = sounds[cur]
-          cur = (cur+1)%sounds.length
+          sound = @sound
         end
         line.set_sound sound
         notes = line.to_a
@@ -106,15 +104,11 @@ module AldaRb
         str += "  ]#{"," unless i == score.length-1}\n"
         i += 1
       end
-      str + "}#{", #{@header.length}" if @header and @header.length})\n"
+      str + "})\n"
     end
   end
 
   class AldaBlock < AldaBase
-    def value
-      title = find(ScoreTitle)
-      (title ? title.value+"\n\n" : "") + "__streams.push " + super
-    end
   end
 
   class AldaComment < Treetop::Runtime::SyntaxNode
@@ -140,13 +134,13 @@ module AldaRb
       root = elements[2].elements.select{|e| !e.is_a? Space and !e.is_a? AldaComment}
       res = []
       root.each do |e|
-        if e.class == MethodCall or e.class == Variable
+        if [MethodCall, Variable, Brackets].include? e.class
           res.push "{type: :stream, streams: #{e.value}}"
         elsif e.class == InlineEffect
           e.set_sound sound
           res.push "{type: :stream, streams: #{e.value}}"
         elsif e.class == Note
-          res.push "{type: :sound#{", duration: #{e.duration}" if e.duration}, frequency: :#{e.frequency}#{", chord: true" if e.chord?}#{", accidentals: #{e.accidentals.to_s}" if e.accidentals}}"
+          res.push "{type: :sound#{", duration: #{e.duration}" if e.duration}, frequency: #{e.frequency}#{", chord: true" if e.chord?}#{", accidentals: #{e.accidentals.to_s}" if e.accidentals}}"
         elsif e.class == Special or e.class == ARest
           res.push "{type: :special, name: :#{e.name}#{", value: #{e.num}" if e.num}}"
         elsif e.class == OctaveUp or e.class == OctaveDown
@@ -157,9 +151,6 @@ module AldaRb
       end
       res
     end
-  end
-
-  class AldaScore < AldaBlock
   end
 
   class ANumber < Treetop::Runtime::SyntaxNode
@@ -178,6 +169,8 @@ module AldaRb
         else
           dur.vals
         end
+      elsif dur = find(CurlyBrackets)
+        '(' + dur.value[0..-2] + ')'
       end
     end
   end
@@ -230,6 +223,16 @@ module AldaRb
   end
 
   class CurlyBrackets < Treetop::Runtime::SyntaxNode
+  end
+
+  class DefAldaBlock < AldaBase
+    def value
+      title = find(ScoreTitle)
+      (title ? title.value+"\n\n" : "") + "__streams.push " + super
+    end
+  end
+
+  class AldaScore < DefAldaBlock
   end
 
   class Dot < Treetop::Runtime::SyntaxNode
@@ -292,26 +295,12 @@ module AldaRb
   end
 
   class InlineEffect < AldaBase
-    class InlineHeader
-      def initialize effsound
-        @effsound = effsound
-      end
-
-      def length
-        nil
-      end
-
-      def sounds
-        [@effsound]
-      end
-    end
-
     def set_sound sound
       @sound = sound
     end
 
     def value
-      @header = InlineHeader.new "Effect.new(#{@sound}, #{elements.last.value})"
+      @sound = "Effect.new(#{@sound}, #{elements.last.value})"
       '[' + super + ']'
     end
 
@@ -341,16 +330,31 @@ module AldaRb
         else
           dur.vals
         end
+      elsif search(Pitch)
+        dur = find CurlyBrackets
+        if dur
+          '(' + dur.value[1..-2] + ')'
+        end
+      else
+        brks = find_all CurlyBrackets
+        if brks.length == 2
+          '(' + brks[1].value[1..-2] + ')'
+        end
       end
     end
 
     def frequency
-      find(Pitch).value.to_sym
+      pitch = search Pitch
+      if pitch
+        ':' + pitch.value
+      else
+        '(' + find(CurlyBrackets).value[1..-2] + ')'
+      end
     end
 
     def accidentals
-      if elements[1].elements.length > 0
-        ret = elements[1].elements.map {|e| e.value }
+      if find(CurlyBrackets).nil? and elements[0].elements[1].elements.length > 0
+        ret = elements[0].elements[1].elements.map {|e| e.value }
       else
         nil
       end
@@ -423,7 +427,7 @@ module AldaRb
       @header = find TonedefHeader
       body = ""
       find(Treetop::Runtime::SyntaxNode).elements.each do |e|
-        if e.is_a? AldaBlock
+        if e.is_a? DefAldaBlock
           e.header = @header
         end
         body += e.value
@@ -435,12 +439,8 @@ module AldaRb
 
     def header
       "def #{@header.name}#{@header.args}\n" \
-        "  __length = #{@header.length}\n" \
         "  __streams = []\n"
     end
-  end
-
-  class TonedefBrackets < Treetop::Runtime::SyntaxNode
   end
 
   class TonedefHeader < Treetop::Runtime::SyntaxNode
@@ -448,20 +448,8 @@ module AldaRb
       find(Arguments).value
     end
 
-    def length
-      if number = find(TonedefBrackets).find(ANumber)
-        Float(number.value)
-      else
-        nil
-      end
-    end
-
     def name
       find(Variable).value
-    end
-
-    def sounds
-      find(TonedefBrackets).find(CommaSeparatedList).to_a
     end
   end
 

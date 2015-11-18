@@ -47,9 +47,22 @@ module ARB
     def sine_pan hz, amp=1.0
       Proc.new do |t,sound|
         realt = t/sound.frequency
-        pan = 0.5 + Math.sin(realt*hz*2*Math::PI)/2.0
+        pan = 0.5 + Math.sin(realt*hz*2*Math::PI)/2.0*amp
         sample = sound.sample t
         Sample.new [pan*sample.left, (1-pan)*sample.right]
+      end
+    end
+
+    def sine_vol hz, amp=1.0
+      Proc.new do |t,sound|
+        realt = t/sound.frequency
+        ((1.0-amp)+(amp*Math.sin(realt*hz*2*Math::PI)))*sound.sample(t)
+      end
+    end
+
+    def id
+      Proc.new do |t,sound|
+        sound.sample t
       end
     end
 

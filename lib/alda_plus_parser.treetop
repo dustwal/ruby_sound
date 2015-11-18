@@ -1,11 +1,15 @@
 grammar AldaRb
 
   rule root
-    ( tonedef / ruby_block )* alda_score <ScoreRoot>
+    ( tonedef / alda_block / ruby_block)* alda_score <ScoreRoot>
   end
 
   rule tonedef
-    def_header ( alda_block / ruby_block )* def_end <Tonedef>
+    def_header ( def_alda_block / ruby_block )* def_end <Tonedef>
+  end
+
+  rule def_alda_block
+    alda_open alda_line* alda_line_close <DefAldaBlock>
   end
 
   rule alda_block
@@ -37,7 +41,7 @@ grammar AldaRb
   end
 
   rule primary
-    arguments / hash / brackets / number / string / symbol / variable
+    arguments / hash / brackets / number / string / symbol / method_call / variable
   end
 
   rule string
@@ -61,19 +65,11 @@ grammar AldaRb
   end
 
   rule def_header
-    'tonedef' space variable space? def_brackets space? arguments ( ';' / new_line ) <TonedefHeader>
-  end
-
-  rule def_brackets
-    '[' space? number? space? ':' space? csl? space? ']' <TonedefBrackets>
+    'tonedef' space variable space? arguments ( ';' / new_line ) <TonedefHeader>
   end
 
   rule def_end
     'fin'
-  end
-
-  rule csl
-    variable ( space? ',' space? csl )? <CommaSeparatedList>
   end
 
   rule alda_score
@@ -101,7 +97,7 @@ grammar AldaRb
   end
 
   rule alda_word
-    alda_comment / inline_effect / alda_val_set / bar / method_call / note / rest / special / alda_operator / variable
+    alda_comment / inline_effect / alda_val_set / bar / method_call / note / rest / special / alda_operator / variable / brackets
   end
 
   rule alda_val_set
@@ -161,7 +157,7 @@ grammar AldaRb
   end
 
   rule note
-    pitch accidental* duration? chord? <Note>
+    ((pitch accidental*) / curly_brackets) duration? chord? <Note>
   end
 
   rule special
@@ -173,11 +169,11 @@ grammar AldaRb
   end
 
   rule pitch
-    [a-hA-H]+ <Pitch>
+    [a-hA-H] <Pitch>
   end
 
   rule special_char
-    [i-z]+ [a-z]* <SpecialChar>
+    [i-z] <SpecialChar>
   end
 
   rule number
@@ -189,7 +185,7 @@ grammar AldaRb
   end
 
   rule duration
-    duration_with_int / duration_with_dot / duration_with_tie
+    duration_with_int / duration_with_dot / duration_with_tie / curly_brackets
   end
 
   rule duration_with_dot

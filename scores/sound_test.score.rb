@@ -1,6 +1,6 @@
-linear_fade = ARB::EFX.power_fade 1
-quadratic_fade = ARB::EFX.power_fade 2
-inv_quadratic_fade = ARB::EFX.inverse_power_fade 2
+linear_fade = power_fade 1
+quadratic_fade = power_fade 2
+inv_quadratic_fade = inverse_power_fade 2
 
 lr = Effect.define do |t, sound|
   realt = t/sound.frequency
@@ -10,18 +10,20 @@ lr = Effect.define do |t, sound|
 end
 
 sound1 = FreqSum[[1,0,1,:sine]] -> linear_fade
-sound2 = FreqSum[[1,0,1,:sine]] -> quadratic_fade
+sound2 = FreqSum[[1,0,1,:sine]] -> power_fade(2)
 sound3 = FreqSum[[1,0,1,:sine]] -> inv_quadratic_fade -> lr
 
-tonedef scale [16:] (sound)
+tonedef scale (sound)
   ::=
-    sound: | c2 d4 e | f g a b |<c2>b4 a | g f e d |
-    =::
+    sound: | c2 c+4 d | e- e f f+ | {:g} a- a b- | b <{:c}{2.0}>b{1.0} a+ | a g+ g g- | f e d+ d | d-
+  =::
 fin
+
+somestream = ::= sound1: scale(sound1) =::
 
 :<>:sound_test:<>:
 
 :master: | (volume 30)
-sound1:  |             o5 scale(sound1) | c1 |~1  |~1                            ||
-sound2:  |             o4 r1  |scale(sound2) | c1 |~1                            ||
-sound3:  | (volume 50) o2 r1  |~1 | scale(sound3) | (c4 e g<c) -> quadratic_fade ||
+sound1:  |             o5 [somestream] | c1 |~1  |~1                              ||
+sound2:  |             o4 r1~2  |scale(sound2) | c1 |~1                           ||
+sound3:  | (volume 50) o2 r1  |~1~2~4 | scale(sound3) | (c4 e g<c) -> power_fade(2) ||

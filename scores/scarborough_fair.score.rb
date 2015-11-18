@@ -11,23 +11,23 @@ $piano_right = FreqSum[[1,0,1,:sine]] -> (power_fade(2))
 $piano_left = FreqSum[[1,0,1,:sine]] -> (power_fade(1))
 $bass = FreqSum[[1,0,0.75,:sine],[1,0,0.25,:triangle],[2,0,0.5,:sine]] -> (sine_pan(3.0, 0.3)) -> (inverse_power_fade(3))
 
-tonedef guitar_high_bar_1 [3:$guitar] ()
-  ::= r8 b d c+ a d =::
+tonedef guitar_high_bar_1 ()
+  ::= $guitar: r8 b d c+ a d =::
 fin
 
-tonedef guitar_high_bar_2 [3:$guitar] ()
-  ::= r8 b e>b<f+ e =::
+tonedef guitar_high_bar_2 ()
+  ::= $guitar: r8 b e>b<f+ e =::
 fin
 
-tonedef guitar_high_bar_3 [3:$guitar] ()
-  ::= r8 b e>b<f+ d =::
+tonedef guitar_high_bar_3 ()
+  ::= $guitar: r8 b e>b<f+ d =::
 fin
 
-tonedef piano_accent [9:$piano_right] ()
-  ::= | r4 g4. e8 |~4 f+4. d8 |~4 r2 | =::
+tonedef piano_accent ()
+  ::= $piano_right: | r4 g4. e8 |~4 f+4. d8 |~4 r2 | =::
 fin
 
-tonedef melody_1 [72:] (sound)
+tonedef melody_1 (sound)
 ::=
 sound: | e2  e4 | b2~8 b8 | f+4. g8 f+4 | e2.   |~2   r4 |
 sound: | r>b<d  | e2 d4   |>b  <c+ >a   | b2.   |~2.     | r2.  |
@@ -36,23 +36,23 @@ sound: | e   b4 | a2 g4   | f+  e   d   | e2.   |~2.     | r2. r|
 =::
 fin
 
-tonedef right_piano_1 [3:$piano_right] ()
-::= | r8. e16/g a e8/g f+ e/g r | =::
+tonedef right_piano_1 ()
+::= $piano_right: | r8. e32/g a e8/g f+ e/g r | =::
 fin
 
-tonedef right_piano_2 [3:$piano_right] ()
-::= | r8.<c16>g8/b a g/b r | =::
+tonedef right_piano_2 ()
+::= $piano_right: | r8.<c16>g8/b a g/b r | =::
 fin
 
-tonedef right_piano_pair [:$piano_right] (n)
+tonedef right_piano_pair (n)
   if n > 1
-    ::= | r8.<e16/g e8/g f+ e/g r | =::
+    ::= $piano_right: | r8.<e16/g e8/g f+ e/g r | =::
   end
-  ::= | r8. e16 e8/g f+ e/g r | =::
+  ::= $piano_right: | r8. e16 e8/g f+ e/g r | =::
 fin
 
-tonedef left_piano_eb [3:$piano_left] ()
-::= | e2./r8 b~2 | =::
+tonedef left_piano_eb ()
+::= $piano_left: | e2./r8 b~2 | =::
 fin
 
 $gh_1 = guitar_high_bar_1
@@ -138,3 +138,21 @@ $guitar_low:  | d2.              |~2         d4 | e2.            | d            
 $piano_right: | d8./f+ e16 d2    | r2.          | $piano_rpair_1 | r4 d8/f+ e d/f+ r | r8. d16/f+ d8/f+ e  d/f+ r  | r8. g16/b g8/b a  g/b r |
 $piano_left:  | d2.~2/r8 f+~2    | r4 f+2/r4 d  | $piano_left_eb | d2.~2/r8 a~2      | r2                    d4    | $piano_left_eb          |
 $bass:        |<d2       >a4     |<d4.   >a8<d4 | e2.            |<d                 |>d4    d               d     | e4.            d8 e   d |
+
+$tenor0:      | j9                                                                          | e8 e4.  e4     | b        a       g     |
+$tenor1:      | a          g       f+    | g         f+     d     | e2                  r4  | r2.            | r2               d8 e  |
+$baritone:    | j9                                                                          | e8 e4.  e4     | e        e       e     |
+$guitar:      | $gh_2                    | $gh_1                  | $gh_2                   | $gh_1          | $gh_3                  |
+$guitar_low:  | e                        | e                      | e                       | e              | e                      |
+$piano_right: | r8. g16/<e e8/>g<d>g/b r | r8. e16/a e8/a g e/a r | r8. e32/g a e8/g f+ e r | r4>e8 g b4     | r8 e16 e g b<e d>b8 f+ |
+$piano_left:  | $piano_left_eb           | $piano_left_eb         | $piano_left_eb          | $piano_left_eb | $piano_left_eb         |
+$bass:        | e4.              d8 e  d | e4.            d8 e  d | e4. d8 e d              | e2.            |>e                      |
+
+$tenor0:      | f+    g      f+     | e2.              | r2.               | r4       b   <d   | e2            d4  |>b   <c+  >a  |
+$tenor1:      | f+4   e      f+     | g        f+   e  | f+       e    d   |>b2            r4  | r2.               | r            |
+$baritone:    | d     d      d      | e2.              | r                 | r4       g    a   | a        g    g   | g    a    a  |
+$guitar:      | f+8 d g/>b<d f+4/>a | $gh_1            | $gh_3             | r8 b     d> b<g d | r  b     d> b<g d | b d <c+>e a4 |
+$guitar_low:  | d                   | e                | e                 | g                 | e                 | g4   a2      |
+$piano_right: | r8  d a/<f+ d>f+ d  | r8 e16 e b8<e>b4 | r8 e16 e b8<g e>b | r8 d16 d<d8 b g d | r8>g16 b<e8 g b g | r8>d b<e d>b |
+$piano_left:  | d2./r8 a~2          | $piano_left_eb   | $piano_left_eb    | g2./r8 b~2        | $piano_left_eb    |>g4/<d e2/>a  |
+$bass:        | d     d      d      | e2           >b4 |<e4.        >b8<e4 | g2.               |<e                >|>g4   a    a  |

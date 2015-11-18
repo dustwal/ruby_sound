@@ -26,7 +26,6 @@ class Stream
     @pos[:master] ||= [0,0]
     @values = Hash[map.keys.map{|k| [k, DEFAULT_VALUES.merge({})]}]
     @values[:master] = DEFAULT_VALUES.merge({volume: 100.0/1.27})
-    @samples = {}
   end
 
   def set_values hash
@@ -60,8 +59,6 @@ class Stream
   end
 
   def samples
-    return @samples[@values] if @samples[@values]
-    start_values = copy
     samples = []
     while n = next_sound
       case n[:type]
@@ -96,14 +93,22 @@ class Stream
           @values[n[:sound]][:octave] = n[:value]
         when :j
           @pos[n[:sound]][0] += n[:value]*60.0/@values[n[:sound]][:tempo]
+          vals = @values[n[:sound]]
+          start_index = time_to_samples n[:start], vals[:sample_rate]
+          end_index_full = start_index + Integer((n[:value]*60.0/vals[:tempo]*vals[:sample_rate]).round)
+          expand_array samples, end_index_full
         when :r
-          if n[:value]
-            dur = n[:value]
-            if dur.is_a? Hash
-              dur = @values[n[:sound]][:duration]*(dur[:factor] || 1)+(dur[:add] || 0)
-            end
-            @values[n[:sound]][:duration] = dur
+          dur = n[:value]
+          if dur.is_a? Hash
+            dur = @values[n[:sound]][:duration]*(dur[:factor] || 1)+(dur[:add] || 0)
+          elsif dur.nil?
+            dur = @values[n[:sound]][:duration]
           end
+          vals = @values[n[:sound]]
+          start_index = time_to_samples n[:start], vals[:sample_rate]
+          end_index_full = start_index + Integer((dur*60.0/vals[:tempo]*vals[:sample_rate]).round)
+          expand_array samples, end_index_full
+          @values[n[:sound]][:duration] = dur
           @pos[n[:sound]][0] += @values[n[:sound]][:duration]*60.0/@values[n[:sound]][:tempo]
         end
       when :operator
@@ -117,7 +122,7 @@ class Stream
       end
     end
     reset
-    @samples[start_values] = samples
+    samples
   end
 
   private
@@ -133,10 +138,12 @@ class Stream
       @values[sound][:duration] = obj[:duration]
     end
     set_vals = vals.merge obj
-    set_vals[:frequency] = 261.625565*(2**(set_vals[:octave]-4))*set_vals[:pitch_set].frequency_for(set_vals[:frequency])
-    if set_vals[:accidentals]
-      set_vals[:accidentals].each do |acc|
-        set_vals[:frequency] = set_vals[:pitch_set].mod_with(acc).call set_vals[:frequency]
+    unless set_vals[:frequency].is_a? Numeric
+      set_vals[:frequency] = 261.625565*(2**(set_vals[:octave]-4))*set_vals[:pitch_set].frequency_for(set_vals[:frequency])
+      if set_vals[:accidentals]
+        set_vals[:accidentals].each do |acc|
+          set_vals[:frequency] = set_vals[:pitch_set].mod_with(acc).call set_vals[:frequency]
+        end
       end
     end
     puts set_vals[:frequency]
@@ -191,11 +198,8 @@ class Stream
       case obj[:type]
       when nil
         obj = {type: :attributes, attributes: obj}
-      when :sound
-        obj[:start] = @pos[key][0]
-      when :stream
-        obj[:start] = @pos[key][0]
       end
+      obj[:start] = @pos[key][0]
       @pos[key][1] += 1
       obj[:sound] = key
       obj

@@ -5,11 +5,11 @@ $beat = FreqSum[[1,0,0.2,:sawtooth],[0.8]] -> (power_fade(5))
 $melt = FreqSum[[1,0,0.25,:triangle],[1,0,0.65,:sine],[2,0,0.1,:sine]] -> (power_fade(2))
 $harm = FreqSum[[1,0,1,:sine]] -> (inverse_power_fade(2))
 
-tonedef beats_1 [:$beat] (n)
+tonedef beats_1 (n)
   (n-1).times do
-    ::= >c4<c c8 c16 c =::
+    ::= $beat: >c4<c c8 c16 c =::
   end
-  ::= >c4<c =::
+  ::= $beat: >c4<c =::
 fin
 
 
