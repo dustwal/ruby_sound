@@ -97,7 +97,12 @@ grammar AldaRb
   end
 
   rule alda_word
-    alda_comment / inline_effect / alda_val_set / bar / method_call / note / rest / special / alda_operator / variable / brackets
+    alda_comment / inline_effect / alda_val_set / bar / method_call / special_chord / note / rest / special / alda_operator / variable / brackets
+  end
+
+  # no curly brackets for pitch TODO
+  rule special_chord
+    ((pitch accidental*) / curly_brackets) ('dim' / [Mm]) duration? chord? <SetChord>
   end
 
   rule alda_val_set

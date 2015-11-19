@@ -15,7 +15,7 @@ sound3 = FreqSum[[1,0,1,:sine]] -> inv_quadratic_fade -> lr
 
 tonedef scale (sound)
   ::=
-    sound: | c2 c+4 d | e- e f f+ | {:g} a- a b- | b <{:c}{2.0}>b{1.0} a+ | a g+ g g- | f e d+ d | d-
+    sound: | c\gM2/h c+4 ddim | e- e f f+ | {:g} a- a b- | b <{:c}{2.0}>b{1.0} a+ | a g+ g g- | f e d+ d | d-
   =::
 fin
 
@@ -23,7 +23,7 @@ somestream = ::= sound1: scale(sound1) =::
 
 :<>:sound_test:<>:
 
-:master: | (volume 30)
+:master: | (volume 25)
 sound1:  |             o5 [somestream] | c1 |~1  |~1                              ||
-sound2:  |             o4 r1~2  |scale(sound2) | c1 |~1                           ||
-sound3:  | (volume 50) o2 r1  |~1~2~4 | scale(sound3) | (c4 e g<c) -> power_fade(2) ||
+sound2:  |             o4 r1~4  |scale(sound2) | c1 |~1                           ||
+sound3:  | (volume 30) o2 r1  |~1~2 | scale(sound3) | (c4 e g<c) -> power_fade(2) ||

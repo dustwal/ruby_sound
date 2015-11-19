@@ -2,6 +2,54 @@ require './score'
 
 module ARB
 
+  module Chords
+
+    PITCH12 = [:c, :'c+', :'d-', :d, :'d+', :'e-', :e, :f, :'f+',
+               :'g-', :g, :'g+', :'a-', :a, :'a+', :'b-', :b]
+
+    def chord sound, intervals, duration, base, accid, chord
+      first = {type: :sound, frequency: base, accidentals: accid, chord: true}
+      if duration
+        first[:duration] = duration
+      end
+      arr = []
+      intervals.each do |interval|
+        arr.push(first.merge({accidentals: (accid + interval)}))
+      end
+      arr[-1][:chord] = chord
+      [Stream.new({sound => arr})]
+    end
+
+    def major_triad sound, duration, base, accid, chord
+      chord sound, [[],Array.new(4,:+),Array.new(7,:+)], duration, base, accid, chord
+    end
+
+    def minor_triad sound, duration, base, accid, chord
+      chord sound, [[],Array.new(3,:+),Array.new(7,:+)], duration, base, accid, chord
+    end
+
+    def diminished_triad sound, duration, base, accid, chord
+      chord sound, [[],Array.new(3,:+),Array.new(6,:+)], duration, base, accid, chord
+    end
+
+    PITCH12.each do |sym|
+      {"M" => "major_triad", "m" => "minor_triad", "dim" => "diminished_triad"}.each do |str, metho|
+        define_method "#{sym}#{str}" do |sound, duration, chord|
+          case sym.to_s[-1]
+          when "s"
+            accidentals = [:+]
+          when "f"
+            accidentals = [:-]
+          else
+            accidentals = []
+          end
+          method(metho).call sound, duration, sym, accidentals, chord
+        end
+      end
+    end
+
+  end
+
   module EFX
 
     def position t, sound

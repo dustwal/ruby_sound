@@ -134,7 +134,8 @@ module AldaRb
       root = elements[2].elements.select{|e| !e.is_a? Space and !e.is_a? AldaComment}
       res = []
       root.each do |e|
-        if [MethodCall, Variable, Brackets].include? e.class
+        if [MethodCall, Variable, Brackets, SetChord].include? e.class
+          e.set_sound sound if e.is_a? SetChord
           res.push "{type: :stream, streams: #{e.value}}"
         elsif e.class == InlineEffect
           e.set_sound sound
@@ -146,7 +147,7 @@ module AldaRb
         elsif e.class == OctaveUp or e.class == OctaveDown
           res.push "{type: :operator, value: :#{e.value}}"
         elsif e.class == ValSet
-          res.push "{#{e.name}: #{e.val}}"
+          res.push "{#{e.name}: (#{e.val})}"
         end
       end
       res
@@ -343,6 +344,10 @@ module AldaRb
       end
     end
 
+    def set_sound sound
+      @sound = sound
+    end
+
     def frequency
       pitch = search Pitch
       if pitch
@@ -386,6 +391,12 @@ module AldaRb
   class ScoreTitle < Treetop::Runtime::SyntaxNode
     def value
       "score_title = \"#{elements[1].value}\"\n"
+    end
+  end
+
+  class SetChord < Note
+    def value
+      "method('#{elements[0].value + elements[1].value}').call(#{@sound},#{duration || "nil"},#{chord?})"
     end
   end
 
