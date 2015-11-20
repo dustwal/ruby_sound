@@ -1,5 +1,7 @@
-.chrome_yardoc
+.chrome_doc
 .yard*
 doc/
+scores/
+tmp/
 *.freq
 *.wav

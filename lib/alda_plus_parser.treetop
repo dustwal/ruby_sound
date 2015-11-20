@@ -102,7 +102,7 @@ grammar AldaRb
 
   # no curly brackets for pitch TODO
   rule special_chord
-    ((pitch accidental*) / curly_brackets) ('dim' / [Mm]) duration? chord? <SetChord>
+    ((pitch accidental*) / curly_brackets) ('dim' / 'aug' / [Mm]) duration? chord? <SetChord>
   end
 
   rule alda_val_set

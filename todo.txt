@@ -1,6 +1,6 @@
-Future Features:
+TODO:
 Add chords to vars / method calls
-add chords(m,M,m7...) to lib
+add chords(m,M,m7...) to lib \g base notes
 make tonedefs pass in sound as 'this'
 inline operators to modify asound (more than what i have???) add to all specials
 recursive effects
@@ -14,5 +14,5 @@ or to view full compiled scores rendered into human readable formats (might be
 worth turning into Alda (or similar) score and use alda plugins to do that)
 
 Bugs/Optimization:
-treat rest value as duration not just number?
-get rid of stream cache
+guitar / compound / effect? samplevssample_atvssample soud interaction..
+Sound should be class??

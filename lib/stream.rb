@@ -1,5 +1,4 @@
 require './lib/sound'
-require './lib/rest'
 
 class Stream
 

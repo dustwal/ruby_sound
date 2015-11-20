@@ -1,6 +1,6 @@
 require './lib/wave_form'
 
-class FreqWave
+class Wave
 
   attr_accessor :frequency, :phase, :amplitude, :wave_form
 

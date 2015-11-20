@@ -32,8 +32,13 @@ module ARB
       chord sound, [[],Array.new(3,:+),Array.new(6,:+)], duration, base, accid, chord
     end
 
+    def augmented_triad sound, duration, base, accid, chord
+      chord sound, [[],Array.new(4,:+),Array.new(8,:+)], duration, base, accid, chord
+    end
+
     PITCH12.each do |sym|
-      {"M" => "major_triad", "m" => "minor_triad", "dim" => "diminished_triad"}.each do |str, metho|
+      {"M" => "major_triad", "m" => "minor_triad",
+       "dim" => "diminished_triad", "aug" => "augmented_triad"}.each do |str, metho|
         define_method "#{sym}#{str}" do |sound, duration, chord|
           case sym.to_s[-1]
           when "s"

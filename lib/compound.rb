@@ -1,8 +1,24 @@
+##
+# container representing the combination (sum) of two or more Sounds
+#
+# +author+ dustin walde
 class Compound
 
   include Sound
+
+  ##
+  # Array<Sound>
   attr_reader :sounds
 
+  ##
+  # creates new Compound
+  #
+  # ===== params
+  # [Array<Sound>, Sound+] if Array is passed, combines all Sounds in the array.
+  # if 2 or more Sounds are passed, combines those
+  #
+  # ===== return
+  # Compound newly created
   def initialize *sounds
     case sounds.length
     when 0
@@ -14,8 +30,10 @@ class Compound
     end
   end
 
+  ##
+  # samples by taking the sum of every sound sampled at t
   def sample_at t
-    @sounds.map{|s| s[t]}.reduce :+
+    @sounds.map{|s| s.sample_at t}.reduce :+
   end
 
   def + rhs
