@@ -33,7 +33,11 @@ class Compound
   ##
   # samples by taking the sum of every sound sampled at t
   def sample_at t
-    @sounds.map{|s| s.sample_at t}.reduce :+
+    #@sounds.map{|s| s.sample t}.reduce :+
+    samples = @sounds.map{|s| s.sample t}
+    ret = 0.0
+    samples.each{|s| ret = s + ret }
+    ret
   end
 
   def + rhs
@@ -42,6 +46,12 @@ class Compound
     else
       Compound.new @sounds + [rhs]
     end
+  end
+
+  alias sound_set_values set_values
+  def set_values args
+    sound_set_values args
+    @sounds.each { |sound| sound.set_values args }
   end
 
 end

@@ -1,18 +1,18 @@
 include Math
 module WaveForm
 
-  TYPES = [:abscircle, :abssawtooth, :abssin, :abstriangle, :circle, :sawtooth, :sine, :square, :triangle]
+  TYPES = [:abscircle, :abssawtooth, :abssine, :abstriangle, :circle, :sawtooth, :sine, :square, :triangle]
 
   def self.wave sym, angle
     case sym
     when :abscircle
-      2*(abs circle angle)-1
+      2*(circle angle/2.0).abs-1
     when :abssawtooth
-      2*(abs sawtooth angle)-1
-    when :abssin
-      2*(abs sin angle)-1
+      2*(sawtooth angle).abs-1
+    when :abssine
+      2*(sin angle/2.0).abs-1
     when :abstriangle
-      2*(abs triangle angle)-1
+      2*(triangle angle/2.0).abs-1
     when :circle
       circle angle
     when :triangle
@@ -50,7 +50,7 @@ module WaveForm
   end
 
   def self.sawtooth langle
-    angle(langle)/2 - 1
+    angle(langle)/PI - 1
   end
 
   def self.square langle

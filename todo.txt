@@ -17,3 +17,9 @@ worth turning into Alda (or similar) score and use alda plugins to do that)
 Bugs/Optimization:
 guitar / compound / effect? samplevssample_atvssample soud interaction..
 Sound should be class??
+
+Sound experimentation:
+  list of ideas:
+    - low sustained rumble.
+    - short smooth high drop bell twinkle
+    - trumpet like sharp loud

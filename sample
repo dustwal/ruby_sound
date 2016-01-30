@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+if ARGV.length < 1
+  puts "USAGE: <sounds file name>"
+  exit
+end
+
+base_name = ARGV[0].split("/")[-1].split(".")[0]
+
+system "cat #{ARGV[0]} ./lib/sound_sampler.score.rb > ./tmp/sound_sampler.score.rb"
+unless $?.exitstatus == 0
+  puts "ERROR: on file contatenation"
+  exit
+end
+system "./render ./tmp/sound_sampler.score.rb"
+system "mv -i sound_sample.wav #{base_name}.wav"
+unless $?.exitstatus == 0
+  puts "ERROR: moving wav"
+  exit
+end
+system "rm ./tmp/sound_sampler.score.rb"

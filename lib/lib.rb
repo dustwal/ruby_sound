@@ -74,6 +74,17 @@ module ARB
       end
     end
 
+    def quick_fade
+      Proc.new do |t,sound|
+        time_left = sound.length - t/sound.frequency
+        if time_left < 0.05
+          time_left/0.05*sound.sample(t)
+        else
+          sound.sample t
+        end
+      end
+    end
+
     def binaural_beats hz
       Proc.new do |t,sound|
         lsample = sound.sample(t*(sound.frequency-(hz/2.0))/sound.frequency).left
@@ -99,18 +110,26 @@ module ARB
     end
 
     def sine_pan hz, amp=1.0
+      wave_pan :sine, hz, amp
+    end
+
+    def wave_pan type, hz, amp=1.0
       Proc.new do |t,sound|
         realt = t/sound.frequency
-        pan = 0.5 + Math.sin(realt*hz*2*Math::PI)/2.0*amp
+        pan = 0.5 + WaveForm.wave(type, realt*hz*2*Math::PI)/2.0*amp
         sample = sound.sample t
         Sample.new [pan*sample.left, (1-pan)*sample.right]
       end
     end
 
     def sine_vol hz, amp=1.0
+      wave_vol :sine, hz, amp
+    end
+
+    def wave_vol type, hz, amp=1.0
       Proc.new do |t,sound|
         realt = t/sound.frequency
-        ((1.0-amp)+(amp*Math.sin(realt*hz*2*Math::PI)))*sound.sample(t)
+        ((1.0-amp)+(amp*WaveForm.wave(type, realt*hz*2*Math::PI)))*sound.sample(t)
       end
     end
 

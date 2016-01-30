@@ -24,6 +24,10 @@ class Sample
     n
   end
 
+  def length
+    @sample.length
+  end
+
   def left
     @sample[0]
   end
@@ -48,10 +52,18 @@ class Sample
   def + rhs
     if rhs.is_a? Array or rhs.is_a? Sample
       if @sample.length == 1
-        @sample[0] + rhs[0]
+        if rhs.is_a? Sample
+          rhs + @sample[0]
+        else
+          rhs.map { |s| s + @sample[0] }
+        end
       else
-        ret = Array.new @sample.length
-        @sample.length.times { |i| ret[i] = @sample[i]+rhs[i] }
+        ret = Array.new [length, rhs.length].max
+        ret.length.times do |i|
+          lval = i >= length ? 0 : @sample[i]
+          rval = i >= rhs.length ? 0 : rhs[i]
+          ret[i] = lval+rval
+        end
         ret
       end
     else
@@ -66,10 +78,18 @@ class Sample
   def * rhs
     if rhs.is_a? Array or rhs.is_a? Sample
       if @sample.length == 1
-        @sample[0] * rhs[0]
+        if rhs.is_a? Sample
+          rhs * @sample[0]
+        else
+          rhs.map { |s| s * @sample[0] }
+        end
       else
-        ret = Array.new @sample.length
-        @sample.length.times { |i| ret[i] = @sample[i]+rhs[i] }
+        ret = Array.new [length, rhs.length].max
+        ret.length.times do |i|
+          lval = i >= length ? 0 : @sample[i]
+          rval = i >= rhs.length ? 0 : rhs[i]
+          ret[i] = lval * rval
+        end
         ret
       end
     else
