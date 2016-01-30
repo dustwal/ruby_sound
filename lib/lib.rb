@@ -38,7 +38,8 @@ module ARB
 
     PITCH12.each do |sym|
       {"M" => "major_triad", "m" => "minor_triad",
-       "dim" => "diminished_triad", "aug" => "augmented_triad"}.each do |str, metho|
+       "o" => "diminished_triad", "dim" => "diminished_triad",
+       "aug" => "augmented_triad"}.each do |str, metho|
         define_method "#{sym}#{str}" do |sound, duration, chord|
           case sym.to_s[-1]
           when "s"
@@ -127,10 +128,16 @@ module ARB
         samp = 0
         i = 1
         while (lastt = lastt - time) > 0
-          samp = (damp**i)*sound.sample(lastt*sound.frequency) + samp
+          samp += (damp**i)*sound.sample(lastt*sound.frequency)
           i += 1
         end
         Sample.new(sound.sample(t) + samp)
+      end
+    end
+
+    def echo_freq ratio, damp
+      Proc.new do |t,sound|
+        echo(ratio/sound.frequency, damp).call t, sound
       end
     end
 

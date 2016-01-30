@@ -1,10 +1,20 @@
 include Math
 module WaveForm
 
-  TYPES = [:sawtooth, :sine, :square, :triangle]
+  TYPES = [:abscircle, :abssawtooth, :abssin, :abstriangle, :circle, :sawtooth, :sine, :square, :triangle]
 
   def self.wave sym, angle
     case sym
+    when :abscircle
+      2*(abs circle angle)-1
+    when :abssawtooth
+      2*(abs sawtooth angle)-1
+    when :abssin
+      2*(abs sin angle)-1
+    when :abstriangle
+      2*(abs triangle angle)-1
+    when :circle
+      circle angle
     when :triangle
       triangle angle
     when :sawtooth
@@ -18,6 +28,15 @@ module WaveForm
 
   def self.noise
     rand * 2 - 1
+  end
+
+  def self.circle langle
+    theta = angle langle
+    if theta < PI
+      (2/PI)*sqrt(((PI/2)**2)-((theta-PI/2)**2))
+    else
+      -(2/PI)*sqrt(((PI/2)**2)-((theta-3*PI/2)**2))
+    end
   end
 
   def self.triangle langle

@@ -89,7 +89,11 @@ grammar AldaRb
   end
 
   rule alda_comment
-    ';;=' <AldaComment> / '=;;' <AldaComment>
+    '/#' end_comment <AldaComment>
+  end
+
+  rule end_comment
+    '#/' / ( ( [\n] / . ) end_comment )
   end
 
   rule bar
@@ -102,7 +106,7 @@ grammar AldaRb
 
   # no curly brackets for pitch TODO
   rule special_chord
-    ((pitch accidental*) / curly_brackets) ('dim' / 'aug' / [Mm]) duration? chord? <SetChord>
+    pitch accidental* ('dim' / 'aug' / [Mmo]) duration? chord? <SetChord>
   end
 
   rule alda_val_set
@@ -162,11 +166,11 @@ grammar AldaRb
   end
 
   rule note
-    ((pitch accidental*) / curly_brackets) duration? chord? <Note>
+    pitch accidental* duration? chord? <Note>
   end
 
   rule special
-    special_char integer? <Special>
+    special_char (integer / curly_brackets)? <Special>
   end
 
   rule rest
@@ -174,7 +178,7 @@ grammar AldaRb
   end
 
   rule pitch
-    [a-hA-H] <Pitch>
+    [a-hA-H] <Pitch> / curly_brackets
   end
 
   rule special_char

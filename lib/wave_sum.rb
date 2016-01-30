@@ -13,7 +13,7 @@ class WaveSum
   end
 
   def sample_at t, freq=1
-    waves.map{|w| w.sample_at t*freq}.reduce(:+) + @noise*WaveForm.noise
+    waves.map{|w| w.sample_at t*freq}.reduce(0, :+) + @noise*WaveForm.noise
   end
 
   def self.[] *arr

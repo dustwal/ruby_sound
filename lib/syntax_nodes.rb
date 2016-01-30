@@ -358,8 +358,8 @@ module AldaRb
     end
 
     def accidentals
-      if find(CurlyBrackets).nil? and elements[0].elements[1].elements.length > 0
-        ret = elements[0].elements[1].elements.map {|e| e.value }
+      if elements[1].elements.length > 0
+        ret = elements[1].elements.map {|e| e.value }
       else
         nil
       end
@@ -396,7 +396,7 @@ module AldaRb
 
   class SetChord < Note
     def value
-      "method('#{elements[0].value + elements[1].value}').call(#{@sound},#{duration || "nil"},#{chord?})"
+      "method('#{elements[0].value + elements[1].value + elements[2].value}').call(#{@sound},#{duration || "nil"},#{chord?})"
     end
   end
 
@@ -415,9 +415,10 @@ module AldaRb
     end
 
     def num
-      int = find AInteger
-      if int
+      if int = find(AInteger)
         Integer int.value
+      elsif int = find(CurlyBrackets)
+        '(' + int.value[1..-2] + ')'
       else
         nil
       end
