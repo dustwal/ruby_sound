@@ -1,2 +1,2 @@
 :<>:sound_sample:<>:
-$sound: a1~1~1~1
+$sound: (quant 100) a1~1~1~1

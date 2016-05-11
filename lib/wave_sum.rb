@@ -17,6 +17,11 @@ class WaveSum
   end
 
   def self.[] *arr
+    if arr.length == 1 and arr[0].is_a? Symbol
+      fs = WaveSum.new
+      fs.waves.push Wave.new(1,0,1,arr[0])
+      return fs
+    end
     fs = WaveSum.new
     arr.each do |attrs|
       if attrs.length == 4
